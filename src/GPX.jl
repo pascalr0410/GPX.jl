@@ -330,7 +330,7 @@ function _parse_gpx(xdoc::XMLDocument)
                                 if name(x_track_point) == "time"
                                     s = content(x_track_point)
                                     dt = tryparse(ZonedDateTime, s, dateformat"yyyy-mm-ddTHH:MM:SSzzz")
-									if dt === nothing dt = parse(ZonedDateTime, s, dateformat"yyyy-mm-ddTHH:MM:SS.ssszzz")
+									if dt === nothing dt = parse(ZonedDateTime, s, dateformat"yyyy-mm-ddTHH:MM:SS.ssszzz") end
                                 elseif name(x_track_point) == "ele"
                                     s = content(x_track_point)
                                     ele = parse(Float64, s)
