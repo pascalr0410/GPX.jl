@@ -11,7 +11,7 @@ using TimeZones
 
 import Base: push!, iterate, length, getindex
 
-export GPXAuthor, GPXMetadata, GPXPoint, 
+export GPXAuthor, GPXMetadata, GPXPoint,
     GPXTrackSegment, GPXDocument, GPXRoute
 export read_gpx_file, parse_gpx_string
 export new_track, new_track_segment, last_segment
@@ -150,7 +150,7 @@ end
     GPXDocument(metadata::GPXMetadata; tracks=GPXTracks(), namespaces=GPX_NS, version=GPX_VERSION, creator=GPX_CREATOR)
 
 GPX documents contain a metadata header, followed by waypoints, routes, and tracks.
-You can add your own elements to the extensions section of the GPX document.    
+You can add your own elements to the extensions section of the GPX document.
 """
 struct GPXDocument
     namespaces::Dict{String, String}
@@ -173,7 +173,7 @@ end
 """
     new_track(gpx::GPXDocument) -> GPXTrack
 
-Get a new track from a `GPXDocument`.  
+Get a new track from a `GPXDocument`.
 """
 function new_track(gpx::GPXDocument)
     return new_track(gpx.tracks)
@@ -212,7 +212,7 @@ end
 
 """
     last_segment(gpx) -> GPXTrackSegment
-    
+
 
 """
 function last_segment(gpx::GPXDocument)
@@ -239,14 +239,14 @@ function LightXML.XMLDocument(gpx::GPXDocument)
     end
     set_attribute(xroot, "version", gpx.version)
     set_attribute(xroot, "creator", gpx.creator)
-    
+
     x_metadata = new_child(xroot, "metadata")
     x_metadata_name = new_child(x_metadata, "name")
     add_text(x_metadata_name, gpx.metadata.name)
     x_metadata_author = new_child(x_metadata, "author")
     x_metadata_author_name = new_child(x_metadata_author, "name")
     add_text(x_metadata_author_name, gpx.metadata.author.name)
-    
+
     for track in gpx.tracks
         x_trk = new_child(xroot, "trk")
         for segment in track.segments
@@ -271,7 +271,7 @@ function LightXML.XMLDocument(gpx::GPXDocument)
             end
         end
     end
-    
+
     return xdoc
 end
 
@@ -311,7 +311,7 @@ function _parse_gpx(xdoc::XMLDocument)
     )
 
     tracks = GPXTracks()
-    
+
     for x_gpx in child_elements(gpxs)
         if name(x_gpx) == "trk"
             track = new_track(tracks)
@@ -329,7 +329,8 @@ function _parse_gpx(xdoc::XMLDocument)
                             for x_track_point in child_elements(x_track_segment)
                                 if name(x_track_point) == "time"
                                     s = content(x_track_point)
-                                    dt = parse(ZonedDateTime, s, dateformat"yyyy-mm-ddTHH:MM:SSzzz")
+                                    dt = tryparse(ZonedDateTime, s, dateformat"yyyy-mm-ddTHH:MM:SSzzz")
+									if dt === nothing dt = parse(ZonedDateTime, s, dateformat"yyyy-mm-ddTHH:MM:SS.ssszzz")
                                 elseif name(x_track_point) == "ele"
                                     s = content(x_track_point)
                                     ele = parse(Float64, s)
